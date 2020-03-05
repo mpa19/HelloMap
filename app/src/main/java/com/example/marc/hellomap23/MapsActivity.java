@@ -4,6 +4,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
 import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
+import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
@@ -24,7 +25,7 @@ import androidx.appcompat.app.AppCompatActivity;
 public class MapsActivity extends AppCompatActivity implements
         OnMarkerClickListener,
         OnMapClickListener,
-        OnMapAndViewReadyListener.OnGlobalLayoutAndMapReadyListener {
+        OnMapReadyCallback {
 
     private static final LatLng EPS = new LatLng(41.60824, 0.623421);
     private static final LatLng BIBLIO = new LatLng(41.608761, 0.624054);
@@ -32,7 +33,7 @@ public class MapsActivity extends AppCompatActivity implements
     private static final LatLng EDUCACIO = new LatLng(41.607915, 0.625385);
 
 
-    private GoogleMap mMap = null;
+    private GoogleMap mMap;
 
     private Marker eps;
     private Marker biblio;
@@ -52,9 +53,8 @@ public class MapsActivity extends AppCompatActivity implements
 
         SupportMapFragment mapFragment =
                 (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
-        new OnMapAndViewReadyListener(mapFragment, this);
 
-        //AAAAAAAAA
+        mapFragment.getMapAsync(this);
     }
 
     @Override
@@ -82,7 +82,6 @@ public class MapsActivity extends AppCompatActivity implements
                 startActivity(intent);
             }
         });
-
         // Add lots of markers to the map.
         addMarkersToMap();
 
@@ -92,13 +91,23 @@ public class MapsActivity extends AppCompatActivity implements
         // Set listener for map click event.  See the bottom of this class for its behavior.
         mMap.setOnMapClickListener(this);
 
-        LatLngBounds bounds = new LatLngBounds.Builder()
-                .include(EPS)
-                .include(BIBLIO)
-                .include(DERECHO)
-                .include(EDUCACIO)
-                .build();
-        mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 50));
+
+        /*mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 50));*/
+
+        mMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
+            @Override
+            public void onMapLoaded() {
+                LatLngBounds bounds = new LatLngBounds.Builder()
+                        .include(EPS)
+                        .include(BIBLIO)
+                        .include(DERECHO)
+                        .include(EDUCACIO)
+                        .build();
+                mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 50));
+            }
+        });
+
+
     }
 
     private void addMarkersToMap() {
@@ -110,7 +119,7 @@ public class MapsActivity extends AppCompatActivity implements
         biblio = mMap.addMarker(new MarkerOptions()
                 .position(BIBLIO)
                 .title("Biblioteca Jaume")
-                .snippet("Porta. UDL"));
+                .snippet("Biblioteca Universitat de Lleida"));
 
         derecho = mMap.addMarker(new MarkerOptions()
                 .position(DERECHO)
